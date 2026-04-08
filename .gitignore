@@ -1,0 +1,16 @@
+node_modules/
+dist/
+
+# Test artifacts
+allure-results/
+allure-report/
+playwright-report/
+test-results/
+blob-report/
+
+# Environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db
