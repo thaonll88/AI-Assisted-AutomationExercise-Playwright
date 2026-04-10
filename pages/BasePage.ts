@@ -1,28 +1,53 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator } from "@playwright/test";
 
 export abstract class BasePage {
   constructor(protected readonly page: Page) {}
 
-  async navigate(path = ''): Promise<void> {
+  async navigate(path = ""): Promise<void> {
     await this.page.goto(path);
   }
 
   async waitForPageLoad(): Promise<void> {
-    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForLoadState("domcontentloaded");
+  }
+
+  // ─── Consent popup ────────────────────────────────────────────────────────
+
+  async dismissConsentPopup(): Promise<void> {
+    const consentRoot = this.page.locator(".fc-consent-root");
+    if (await consentRoot.isVisible({ timeout: 5000 }).catch(() => false)) {
+      const acceptButton = consentRoot
+        .locator(
+          'button[aria-label="Consent"], button.fc-cta-consent, button:has-text("Consent")',
+        )
+        .first();
+      await acceptButton.click({ timeout: 5000 });
+      await consentRoot.waitFor({ state: "hidden", timeout: 5000 });
+    }
+  }
+
+  // ─── Ad popup ─────────────────────────────────────────────────────────────
+
+  async dismissAdPopup(): Promise<void> {
+    const closeButton = this.page.getByText("Close", { exact: true });
+    if (await closeButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await closeButton.click();
+      await this.page.waitForTimeout(500);
+    }
   }
 
   // ─── Newsletter ────────────────────────────────────────────────────────────
 
   get subscriptionEmailInput(): Locator {
-    return this.page.locator('#susbscribe_email');
+    return this.page.locator("#susbscribe_email");
   }
 
   get subscriptionSubmitButton(): Locator {
-    return this.page.locator('#subscribe');
+    return this.page.locator("#subscribe");
   }
 
   get subscriptionSuccessAlert(): Locator {
-    return this.page.locator('#success-subscribe');
+    return this.page.locator("#success-subscribe");
   }
 
   async subscribeNewsletter(email: string): Promise<void> {
@@ -67,11 +92,13 @@ export abstract class BasePage {
   // ─── Scroll ───────────────────────────────────────────────────────────────
 
   get scrollUpButton(): Locator {
-    return this.page.locator('#scrollUp');
+    return this.page.locator("#scrollUp");
   }
 
   async scrollToBottom(): Promise<void> {
-    await this.page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await this.page.evaluate(() =>
+      window.scrollTo(0, document.body.scrollHeight),
+    );
   }
 
   async scrollToTop(): Promise<void> {
