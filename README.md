@@ -13,13 +13,25 @@ End-to-end and API test suite for [automationexercise.com](https://www.automatio
 ## Project structure
 
 ```
-├── pages/               # Page Object Models
+├── pages/                     # Page Object Models
+│   ├── BasePage.ts            # Shared base: nav, consent/ad popup dismissal, scroll
+│   ├── LoginPage.ts           # /login — login and signup forms
+│   ├── SignupPage.ts          # /login (signup step) — account creation form
+│   ├── ProductsPage.ts        # /products — search, product grid, add-to-cart modal
+│   ├── CartPage.ts            # /view_cart — cart table, proceed to checkout
+│   ├── CheckoutPage.ts        # /checkout — address review, comment, place order
+│   └── PaymentPage.ts        # /payment — card form, order confirmation
 ├── tests/
-│   ├── ui/              # UI tests (Chromium, serial)
-│   └── api/             # API tests
-├── helpers/             # Shared utilities (env, etc.)
-├── types/               # TypeScript type definitions
-├── skills/              # Step-by-step flow references
+│   ├── ui/                    # UI tests (Chromium, serial)
+│   │   ├── auth.spec.ts       # Login, logout, register
+│   │   ├── products.spec.ts   # Product search
+│   │   └── cart.spec.ts       # Add to cart, checkout flow
+│   └── api/                   # API tests (no browser)
+│       ├── products.spec.ts   # GET productsList, POST searchProduct
+│       └── account.spec.ts    # POST verifyLogin, POST createAccount
+├── helpers/                   # Shared utilities (env, etc.)
+├── types/                     # TypeScript type definitions
+├── skills/                    # Step-by-step flow references
 │   ├── authentication/
 │   ├── product-browsing/
 │   ├── cart/
@@ -33,6 +45,25 @@ End-to-end and API test suite for [automationexercise.com](https://www.automatio
 ├── tsconfig.json
 └── .github/workflows/ci.yml
 ```
+
+## Test coverage
+
+### UI tests (`tests/ui/`)
+
+| File | Scenarios |
+|---|---|
+| `auth.spec.ts` | Login with valid credentials; login with invalid credentials; logout; register new account |
+| `products.spec.ts` | Search product by keyword — verifies "Searched Products" heading and result cards |
+| `cart.spec.ts` | Add first product to cart and verify cart contents; full checkout as logged-in user (add to cart → checkout → payment → order confirmation) |
+
+### API tests (`tests/api/`)
+
+| File | Endpoint | Scenarios |
+|---|---|---|
+| `products.spec.ts` | `GET /api/productsList` | Returns product list with correct structure |
+| | `POST /api/searchProduct` | Returns matching results; 400 on missing param |
+| `account.spec.ts` | `POST /api/verifyLogin` | Valid credentials; invalid credentials (404); missing email param (400) |
+| | `POST /api/createAccount` | Creates new account (201); duplicate email returns 400 |
 
 ## Setup
 
